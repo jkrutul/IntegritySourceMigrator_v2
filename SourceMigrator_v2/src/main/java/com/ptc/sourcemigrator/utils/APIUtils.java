@@ -4,6 +4,7 @@ package com.ptc.sourcemigrator.utils;
 import java.awt.image.SampleModel;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -560,7 +561,7 @@ public class APIUtils{
 	 * @return null if error occured or Sandbox to new created project.
 	 */
 	public Sandbox createNewProjectAndSandbox(String projectName, String projectRevision,String devPath, String projectLocation, boolean addAllMembersFromProjectLocation) {
-		if (getProject(projectName)!=null) {
+		if (getProject(projectName, projectRevision)!=null) {
 			log.error("Project "+projectName+ " already exist on" +getHostname()+", creation aborted");
 			return null;
 		}
@@ -594,7 +595,7 @@ public class APIUtils{
 		cmd.setCommandName("createproject");
 		cmd.addSelection(projectName);
 		runCommand(cmd, true);
-		List<Project> projects =  getProjects(true,projectName);
+		List<Project> projects =  getProjects(true,projectName, null);
 		if (!projects.isEmpty()) {
 			return projects.get(0);
 		}
@@ -738,7 +739,7 @@ public class APIUtils{
 	}
 	
 	public void displayData() {
-		getProjects(true, null);
+		getProjects(true, null, null);
 		  for(Project project : projects) {
 	        	System.out.println(project);
 	        	List<Sandbox> sandboxes = getSandboxes(project.getName(),this.getHostname());
@@ -753,7 +754,7 @@ public class APIUtils{
 	}
 
 	public void dropAndDeleteAllProjects() {
-		List<Project> projects = getProjects(true, null);
+		List<Project> projects = getProjects(true, null, null);
 		for (Project project : projects) {
 			String projectName = project.getName();
 			dropProject(projectName);
@@ -870,9 +871,9 @@ public class APIUtils{
 		return port;
 	}
 	
-	public Project getProject(String projectName) {
+	public Project getProject(String projectName, String projectRevision) {
 		Project project = null;
-		List<Project> projects = getProjects(true, projectName);
+		List<Project> projects = getProjects(true, projectName, projectRevision);
     	if (!projects.isEmpty()) {
     		project = projects.get(0);
     	}
@@ -907,7 +908,7 @@ public class APIUtils{
 	 * @param projectName - project name
 	 * @return list of projects
 	 */
-	public List<Project> getProjects(boolean displaySubprojects, String projectName ) {
+	public List<Project> getProjects(boolean displaySubprojects, String projectName, String projectRevision ) {
 		List<Project> projects = new LinkedList<Project>();
 		List<String> opts2 = new LinkedList<String>();
 		if (displaySubprojects) {
@@ -932,6 +933,9 @@ public class APIUtils{
 		for (Project project : projects) { //get details 
 			Map<String, String> opts = new HashMap<>();
 			opts.put("project", project.getName());
+			if(projectRevision != null && !projectRevision.isEmpty()) {
+				opts.put("projectRevision", projectRevision);
+			}
 			Map<String,String> item = getSIItem("projectinfo", opts, null, null, false);
 			if (item != null) {
 				project.addProjectProps(item);
@@ -942,6 +946,19 @@ public class APIUtils{
 		return projects;
 	}
 
+	public List<String> getProjectRevisions(String projectName) {
+		Project project = getProject(projectName, null);
+		Map<String, String> options = new HashMap<>();
+		options.put("project", projectName);
+		
+		Map<String, String> items = getSIItem("viewprojecthistory", options, null, null, false);
+		if (!items.isEmpty()) {
+			return Arrays.asList(items.get("revisions").split(","));
+		} else {
+			return null;
+		}		
+	}
+	
 	private Map<String,String> getSIItem(String commandName, Map<String,String> options, List<String> options2, String selection, boolean onServer) {
 		List<Map<String, String>> items = getSIItems(commandName, options, options2, selection, onServer);
 		if (!items.isEmpty()) {

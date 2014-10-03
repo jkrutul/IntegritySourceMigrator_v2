@@ -25,13 +25,13 @@ public class Database {
 	public Session getSession(){
 		return this.session;
 	}
-	
-	public void insertProject(Project project) {
-		session.save(project);
+
+	public void save(Object o){
+		session.save(o);
 	}
 	
-	public void insertMember(Member member){
-		session.save(member);
+	public Object get(Class c, Long id) {
+		return session.get(c, id);
 	}
 	
 	public Project selectProject(String projectName) {
@@ -63,6 +63,12 @@ public class Database {
 	
 	public List<Member> selectMembers() {
 		Query query = session.createQuery("from "+MemberContract.TABLE_NAME);
+		return query.list();
+	}
+	
+	public List<Member> selectMembers(String projectName) {
+		Query query = session.createQuery("from "+MemberContract.TABLE_NAME+" where "+MemberContract.PROJECT+" = :name");
+		query.setParameter("name", projectName);
 		return query.list();
 	}
 	

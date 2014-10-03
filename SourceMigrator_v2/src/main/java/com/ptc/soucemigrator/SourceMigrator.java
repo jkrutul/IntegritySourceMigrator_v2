@@ -86,9 +86,11 @@ public class SourceMigrator {
         //connect to Integrtity servers
         src.connectToIntegrity(	"admin","almalm",SERVER_SRC, "7001");
         dest.connectToIntegrity("admin","almalm",SERVER_DEST, "7001");
+        
+        
+        
         Database db = new Database();
-        Session session = db.getSession();
-
+       
         /*
         Book newBook = new Book();
         newBook.setTitle("Effective Java");
@@ -106,15 +108,20 @@ public class SourceMigrator {
         */
         
         // getProjects
-
-        Project project = dest.getProject(projectName);
+        for (String rev : dest.getProjectRevisions(projectName)) {
+        	Project project = dest.getProject(projectName, rev);
+        	System.out.println(project);
+        }
+        
+        Project project = dest.getProject(projectName,null);
+        dest.getProjectRevisions(projectName);
     	Sandbox sandbox = APIUtils.getSandboxes(project.getName(), project.getServer()).get(0);
     	List<Member> members = dest.getMembers(sandbox.getName(), SERVER_DEST);
     	
-    	session.save(project);
+    	db.save(project);
         for (Member member : members) {
         	member.setProject(project);
-        	session.save(member);
+        	db.save(member);
 
         }
         for(Project p : db.selectProjects()) {
@@ -124,7 +131,8 @@ public class SourceMigrator {
         for(Member m : db.selectMembers()) {
         	System.out.println(m);
         }
-
+        
+        
         
         db.close();
         
@@ -140,7 +148,7 @@ public class SourceMigrator {
         
         for (Member member : membersOfProject) {
         	member.setProject(project);
-        	db.insertMember(member);
+        	db.save(member);
         }
         
         List<Member> membersFromDb = db.selectMembers();
@@ -246,7 +254,7 @@ public class SourceMigrator {
     	Project projectImported, projectMigrated;
     	Sandbox sandboxImported, sandboxMigrated;
 
-    	projectImported= src.getProject(projectName);
+    	projectImported= src.getProject(projectName, null);
     	
     	if ( projectImported != null ) {
     		l.info("Found "+projectName+" on " + src.getHostname());
@@ -279,10 +287,10 @@ public class SourceMigrator {
     	String migratedProjectName = appendix +"/project.pj";
 
     	int i= 0;
-    	if (dest.getProject(migratedProjectName) != null){ // Check whether the project of the same name already exists
+    	if (dest.getProject(migratedProjectName, null) != null){ // Check whether the project of the same name already exists
 	    	for ( ; true; i++) {
 	    		l.info("Already found project named "+migratedProjectName +" on "+src.getHostname()+" server");
-	    		if (dest.getProject(appendix+"_"+Integer.toString(i)+"/project.pj") == null) {
+	    		if (dest.getProject(appendix+"_"+Integer.toString(i)+"/project.pj",null) == null) {
 	    			break;
 	    		}
 	    	}

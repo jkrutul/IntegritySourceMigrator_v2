@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Oct 3, 2014 5:01:26 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.ptc.sourcemigrator.models.Project" table="PROJECT">
+        <id name="projectId" type="java.lang.Long">
+            <column name="PROJECTID" />
+            <generator class="native" />
+        </id>
+        <property name="name" type="java.lang.String">
+            <column name="NAME" />
+        </property>
+        <property name="path" type="java.lang.String">
+            <column name="PATH" />
+        </property>
+        <property name="isSubproject" type="java.lang.String">
+            <column name="ISSUBPROJECT" />
+        </property>
+        <property name="isShared" type="java.lang.String">
+            <column name="ISSHARED" />
+        </property>
+        <property name="parent" type="java.lang.String">
+            <column name="PARENT" />
+        </property>
+        <property name="isVariant" type="java.lang.String">
+            <column name="ISVARIANT" />
+        </property>
+        <property name="isBuild" type="java.lang.String">
+            <column name="ISBUILD" />
+        </property>
+        <property name="buildRevision" type="java.lang.String">
+            <column name="BUILDREVISION" />
+        </property>
+        <property name="server" type="java.lang.String">
+            <column name="SERVER" />
+        </property>
+        <property name="developmentPaths" type="java.lang.String" access="field">
+            <column name="DEVELOPMENTPATHS" />
+        </property>
+    </class>
+</hibernate-mapping>

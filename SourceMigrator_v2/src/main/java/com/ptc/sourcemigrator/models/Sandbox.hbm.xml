@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Oct 3, 2014 5:01:26 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.ptc.sourcemigrator.models.Sandbox" table="SANDBOX">
+        <id name="id" type="java.lang.String">
+            <column name="ID" />
+            <generator class="assigned" />
+        </id>
+        <property name="name" type="java.lang.String">
+            <column name="NAME" />
+        </property>
+        <property name="project" type="java.lang.String">
+            <column name="PROJECT" />
+        </property>
+        <property name="parent" type="java.lang.String">
+            <column name="PARENT" />
+        </property>
+        <property name="isSubsandbox" type="java.lang.String">
+            <column name="ISSUBSANDBOX" />
+        </property>
+        <property name="server" type="java.lang.String">
+            <column name="SERVER" />
+        </property>
+        <property name="developmentPath" type="java.lang.String">
+            <column name="DEVELOPMENTPATH" />
+        </property>
+        <property name="buildRevision" type="java.lang.String">
+            <column name="BUILDREVISION" />
+        </property>
+        <property name="isShared" type="java.lang.String">
+            <column name="ISSHARED" />
+        </property>
+        <property name="sandboxScope" type="java.lang.String">
+            <column name="SANDBOXSCOPE" />
+        </property>
+        <property name="isReferenced" type="java.lang.String">
+            <column name="ISREFERENCED" />
+        </property>
+        <property name="isSparse" type="java.lang.String">
+            <column name="ISSPARSE" />
+        </property>
+    </class>
+</hibernate-mapping>

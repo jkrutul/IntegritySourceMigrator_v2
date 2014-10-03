@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Oct 3, 2014 5:01:26 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.ptc.sourcemigrator.models.Member" table="MEMBER">
+        <id name="memberId" type="java.lang.Long">
+            <column name="MEMBERID" />
+            <generator class="native" />
+        </id>
+        <property name="name" type="java.lang.String">
+            <column name="NAME" />
+        </property>
+        <property name="memberName" type="java.lang.String">
+            <column name="MEMBERNAME" />
+        </property>
+        <property name="parent" type="java.lang.String">
+            <column name="PARENT" />
+        </property>
+        <property name="type" type="java.lang.String">
+            <column name="TYPE" />
+        </property>
+        <property name="memberRev" type="java.lang.String">
+            <column name="MEMBERREV" />
+        </property>
+        <property name="memberRevLocedByMe" type="java.lang.String">
+            <column name="MEMBERREVLOCEDBYME" />
+        </property>
+        <property name="workingRevLockedByMe" type="java.lang.String">
+            <column name="WORKINGREVLOCKEDBYME" />
+        </property>
+        <property name="lockrecord" type="java.lang.String">
+            <column name="LOCKRECORD" />
+        </property>
+        <property name="wfdelta" type="java.lang.String">
+            <column name="WFDELTA" />
+        </property>
+        <property name="revsyncDelta" type="java.lang.String">
+            <column name="REVSYNCDELTA" />
+        </property>
+        <property name="newRevDelta" type="java.lang.String">
+            <column name="NEWREVDELTA" />
+        </property>
+        <property name="merge" type="java.lang.String">
+            <column name="MERGE" />
+        </property>
+        <property name="canonicalSandbox" type="java.lang.String">
+            <column name="CANONICALSANDBOX" />
+        </property>
+        <property name="canonicalMember" type="java.lang.String">
+            <column name="CANONICALMEMBER" />
+        </property>
+        <property name="projectDevpath" type="java.lang.String">
+            <column name="PROJECTDEVPATH" />
+        </property>
+        <property name="date" type="java.lang.String">
+            <column name="DATE" />
+        </property>
+        <property name="frozen" type="java.lang.String">
+            <column name="FROZEN" />
+        </property>
+        <property name="author" type="java.lang.String">
+            <column name="AUTHOR" />
+        </property>
+        <property name="projectName" type="java.lang.String">
+            <column name="PROJECTNAME" />
+        </property>
+        <many-to-one name="project" class="com.ptc.sourcemigrator.models.Project" fetch="join">
+            <column name="PROJECT" />
+        </many-to-one>
+    </class>
+</hibernate-mapping>

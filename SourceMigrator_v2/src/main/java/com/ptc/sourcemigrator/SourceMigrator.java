@@ -1,4 +1,4 @@
-package com.ptc.soucemigrator;
+package com.ptc.sourcemigrator;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +16,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
+import com.mks.api.response.APIException;
 import com.ptc.sourcemigrator.database.Database;
 import com.ptc.sourcemigrator.models.Author;
 import com.ptc.sourcemigrator.models.Book;
@@ -28,13 +29,10 @@ import com.ptc.sourcemigrator.utils.Utils;
 
 
 public class SourceMigrator {
-	public static final String PROPERTIES_FILE = "rict.properties";
-	public static final String SERVER_SRC = "192.168.153.29";
-	public static final String SERVER_DEST = "192.168.153.56";
+	public static final String PROPERTIES_FILE = "sm.properties";
 	
-	public static String oldClientDir, installAppDir, appDir, userHome, mksDir, SIDistDir, serverHostname, serverPort, newIntegrityClientDir, hotfixesDir;
-	public static List<String> oldServerHostnames;
-	public static PropertiesConfiguration clientInstallProp;
+	
+	public static String sourceServer, destinationServer, appDir, srcHostname, destHostname, srcPort, destPort, srcUser, destUser, srcPassword, destPassword;
 	
 	public static CompositeConfiguration config;
 	private static final Logger l = LogManager.getLogger(App.class.getName());
@@ -47,76 +45,98 @@ public class SourceMigrator {
 
 		System.out.println("********** Integrity Source Migratoin Tool **********");
 		config = new CompositeConfiguration();
-		
 		config.addConfiguration(new SystemConfiguration());
-		
 		File f = null;
 		appDir = System.getProperty("user.dir");
-		userHome = System.getProperty("user.home");
-		mksDir = userHome + File.separator + ".mks";
-		SIDistDir = userHome + File.separator + "SIDist";
-		
 		if (appDir != null) {
 			f = new File(appDir+File.separator+PROPERTIES_FILE);
 			if (f.canRead()) {
 				try {
 					config.addConfiguration(new PropertiesConfiguration(f.getAbsoluteFile()));
 				} catch (org.apache.commons.configuration.ConfigurationException e) {
-
 					e.printStackTrace();
 				}
 				l.debug("Added configuration from: " + f.getAbsoluteFile());
-
 			} else {
 				l.error("Configuration file: "+ f.getAbsoluteFile()+ " doesn't exist");
 			}
 		}
 				
+		srcHostname = config.getString("SOURCE_SERVER");
+		destHostname = config.getString("DESTINATION_SERVER");
+		srcPort = config.getString("SOURCE_PORT","7001");
+		destPort = config.getString("DESTINATION_PORT","7001");
+		srcUser = config.getString("SOURCE_USER");
+		destUser = config.getString("DESTINATION_USER");
+		srcPassword = config.getString("SOURCE_PASSWORD");
+		destPassword = config.getString("DESTINATION_PASSWORD");
+		
 		src = new APIUtils();
 		dest = new APIUtils();
 	
 	}
 	
-    public static void exportProjectFromServerToDatabase(String projectName){   
+    public void exportProjectFromServerToDatabase(String projectName){   
     	
     
 
         mainStart = new Timestamp(new java.util.Date().getTime());
         
         //connect to Integrtity servers
-        src.connectToIntegrity(	"admin","almalm",SERVER_SRC, "7001");
-        dest.connectToIntegrity("admin","almalm",SERVER_DEST, "7001");
+        
+        try {
+			src.connectToIntegrity(	srcUser,srcPassword,srcHostname, srcPort);
+		} catch (APIException e) {
+			l.error(e);
+		}
+		
+        try {
+			dest.connectToIntegrity(destUser,destPassword, destHostname, destPort);
+			
+		} catch (APIException e) {
+			l.error(e);
+		}
+        List<Project> projects = src.getProjects(true, null, null);
+  
+        for (Project project : projects) {
+        	System.out.println(project);
+        	for (String projectRev : src.getProjectRevisions(project.getName())) {
+        		System.out.println("pr: "+projectRev);
+        		List<Member> members  = src.getMembers(project.getName(), projectRev, null);
+        		for (Member member : members ) {
+        			System.out.println(member);
+        			for (String memberRev : src.viewhistory(member.getName(), null, null, projectRev, project.getName())) {
+        				System.out.println("mr: "+ memberRev);
+        			}
+        		
+        		}
+        	}
+        }
         
         
         
         Database db = new Database();
-       
-        /*
-        Book newBook = new Book();
-        newBook.setTitle("Effective Java");
-        newBook.setDescription("Best practices for Java programing");
-        newBook.setAuthor(new Author("Joshua Bloch", "joshua.bloch@gmail.com"));
+        List<String> projectReviosions  = src.getProjectRevisions(projectName);
         
-        Long bookId = (Long) session.save(newBook);
         
-        Book book = (Book) session.get(Book.class, bookId);
-        Author author = book.getAuthor();
-        System.out.println(author);
-        System.out.println(book);
-        session.getTransaction().commit();
-        session.close();
-        */
-        
-        // getProjects
-        for (String rev : dest.getProjectRevisions(projectName)) {
-        	Project project = dest.getProject(projectName, rev);
+        // getProjects 
+        for (String rev : projectReviosions) {
+        	Project project = src.getProject(projectName, rev);
         	System.out.println(project);
         }
         
-        Project project = dest.getProject(projectName,null);
-        dest.getProjectRevisions(projectName);
-    	Sandbox sandbox = APIUtils.getSandboxes(project.getName(), project.getServer()).get(0);
-    	List<Member> members = dest.getMembers(sandbox.getName(), SERVER_DEST);
+        Project project = src.getProject(projectName,null);
+
+    	Sandbox sandbox = src.getSandboxes(project.getName(), project.getServer()).get(0);
+    	List<Member> members = src.getMembers(sandbox.getName(), destHostname);
+    	
+    	for (String prRev : projectReviosions){
+    		System.out.println(prRev);
+			for (Member member : members) {
+			    src.viewhistory(member.getName(), null ,null, prRev, null);
+			 }    		
+    	}
+    	
     	
     	db.save(project);
         for (Member member : members) {
@@ -141,8 +161,8 @@ public class SourceMigrator {
         // getProjectRevisions
         
         // getMembersOfProject
-        Sandbox calcSandbox= APIUtils.getSandboxes("/Calculator/project.pj", SERVER_DEST).get(0);
-        List<Member> membersOfProject = dest.getMembers(calcSandbox.getName(), SERVER_DEST);
+        Sandbox calcSandbox= src.getSandboxes("/Calculator/project.pj", destHostname).get(0);
+        List<Member> membersOfProject = dest.getMembers(calcSandbox.getName(), destHostname);
         
         //Project project = db.selectProject(calcSandbox.getProject());
         
@@ -202,7 +222,7 @@ public class SourceMigrator {
         String projectToBeMigrated = "/16_09/GenericSourceMigrator/project.pj";
         String dirToFiles = "C:\\projects\\testing\\16_09\\SOURCE";
         
-        List<Sandbox> sandboxes = APIUtils.getSandboxes("/TEMP/Migrated_11/project.pj", null);
+        List<Sandbox> sandboxes = src.getSandboxes("/TEMP/Migrated_11/project.pj", null);
         Sandbox sandbox = null;
         if (!sandboxes.isEmpty()){
         	sandbox = sandboxes.get(0);
@@ -211,7 +231,7 @@ public class SourceMigrator {
         List<Member> members = src.getMembers(sandbox.getName(), dest.getHostname());
         Member member = members.get(0);
         //member.get
-        //APIUtils.addLabel("prototype2", members, null, null, null, null);
+        //src.addLabel("prototype2", members, null, null, null, null);
         
         src.viewhistory(member.getName(), sandbox.getName(), null, null);
         
@@ -220,14 +240,14 @@ public class SourceMigrator {
         
          */
         /*            
-        APIUtils.dropAllSandboxes(APIUtils.DELETION_POLICY_ALL);
+        src.dropAllSandboxes(src.DELETION_POLICY_ALL);
         src.dropProject(projectToBeMigrated);
         src.deleteProject(projectToBeMigrated);
   
 
         src.dropProject(projectToBeMigrated);
         src.deleteProject(projectToBeMigrated);
-        APIUtils.dropSandbox(dirToFiles, APIUtils.DELETION_POLICY_NONE);
+        src.dropSandbox(dirToFiles, src.DELETION_POLICY_NONE);
         
         dest.dropAndDeleteAllProjects();
    
@@ -266,7 +286,7 @@ public class SourceMigrator {
     	}
     	
     	// Create sandbox (if not exist) -> imported project
-    	List<Sandbox> sandboxesToSrc = APIUtils.getSandboxes(projectImported.getName(), src.getHostname());
+    	List<Sandbox> sandboxesToSrc = src.getSandboxes(projectImported.getName(), src.getHostname());
 
     	if (sandboxesToSrc.size()>0) {
         	l.info("Found " +sandboxesToSrc.size()+ " sandboxes point to " + projectName);
@@ -278,7 +298,7 @@ public class SourceMigrator {
     	} else {
     		l.info("Not found any sanboxes pointing to " + projectName+ ". Creating new one");
     		String sandboxname = new File(projectName).getParent();
-    		sandboxImported = APIUtils.createSandbox(projectName, hostname, null, null, "c:\\sandboxes\\"+sandboxname);
+    		sandboxImported = src.createSandbox(projectName, hostname, null, null, "c:\\sandboxes\\"+sandboxname);
     		l.info(sandboxImported);
     	}
 
@@ -303,7 +323,7 @@ public class SourceMigrator {
     	}
 
     	// Create sandbox -> migrated project
-    	sandboxMigrated = APIUtils.createSandbox(migratedProjectName, dest.getHostname(), null, null, migratedProjectLocation);
+    	sandboxMigrated = src.createSandbox(migratedProjectName, dest.getHostname(), null, null, migratedProjectLocation);
     	l.info("Sandbox to " +migratedProjectName + " has been created");
     	l.info(sandboxMigrated);    	
     	
@@ -332,7 +352,7 @@ public class SourceMigrator {
 
         // Drop importedSandbox, delete importedProject
         l.info("Droping/removing sandbox and project");
-    	APIUtils.dropSandbox(sandboxImported.getName(), APIUtils.DELETION_POLICY_NONE);
+    	src.dropSandbox(sandboxImported.getName(), APIUtils.DELETION_POLICY_NONE);
     	dest.dropProject(projectImported.getName());
     	dest.deleteProject(projectImported.getName());
 

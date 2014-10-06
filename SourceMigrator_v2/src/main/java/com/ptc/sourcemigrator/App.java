@@ -1,4 +1,4 @@
-package com.ptc.soucemigrator;
+package com.ptc.sourcemigrator;
 import java.util.List;
 
 import org.hibernate.Query;

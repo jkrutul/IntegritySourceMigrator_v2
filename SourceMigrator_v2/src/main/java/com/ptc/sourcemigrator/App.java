@@ -1,4 +1,4 @@
-package com.ptc.soucemigrator;
+package com.ptc.sourcemigrator;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -11,9 +11,14 @@ import com.ptc.sourcemigrator.models.Project;
 public class App {
 
 	public static void main(String[] args) {
+		ConsoleClient cc = new ConsoleClient();
 		
-		SourceMigrator sm = new SourceMigrator();
-		sm.exportProjectFromServerToDatabase("/Calculator/project.pj");
+		//String projectName = "/IntegrityA/B/B2/subProjectFilesiii/project.pj";
+		//SourceMigrator sm = new SourceMigrator();
+		//sm.exportProjectFromServerToDatabase("/Calculator/project.pj");
+		//sm.exportProjectFromServerToDatabase(projectName);
+		//sm.exportDataToFile(projectName);
+		//sm.exportProjectFromServerToDatabase(projectName);
 		
 		/*
 		

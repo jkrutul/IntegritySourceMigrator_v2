@@ -8,8 +8,6 @@ import org.hibernate.util.HibernateUtil;
 
 import com.ptc.sourcemigrator.database.contracts.MemberContract;
 import com.ptc.sourcemigrator.database.contracts.ProjectContract;
-import com.ptc.sourcemigrator.models.Author;
-import com.ptc.sourcemigrator.models.Book;
 import com.ptc.sourcemigrator.models.Member;
 import com.ptc.sourcemigrator.models.Project;
 
@@ -34,15 +32,16 @@ public class Database {
 		return session.get(c, id);
 	}
 	
-	public Project selectProject(String projectName) {
+	public List<Project> selectProject(String projectName) {
 		Query query = session.createQuery("from "+ProjectContract.TABLE_NAME+" where "+ProjectContract.NAME+" = :name");
 		query.setParameter("name", projectName);
-		List<?> list = query.list();
-		if (!list.isEmpty()) {
-			return (Project) list.get(0);
-		} else {
-			return null;
-		}		
+		return query.list();
+	}
+	
+	public List<String> selectProjectRevisions(String projectName) {
+		Query query = session.createQuery("select project.revision from "+ProjectContract.TABLE_NAME+" project where "+ProjectContract.NAME+" = :name");
+		query.setParameter("name", projectName);
+		return query.list();
 	}
 	
 	public Member selectMember(String memberName) {
@@ -56,9 +55,17 @@ public class Database {
 		}		
 	}
 	
-	public List<Project> selectProjects() {
+	public  List<Project> selectProjects() {
 		Query query = session.createQuery("from "+ProjectContract.TABLE_NAME);
 		return query.list();
+	}
+	
+	public List<Project> selectProject( String projectName , String projectRevision ){
+		Query query = session.createQuery("from " +ProjectContract.TABLE_NAME + " where " + ProjectContract.NAME + " LIKE :projectName AND " +ProjectContract.REVISION + " LIKE :projectRevision" );
+		query.setParameter("projectName", projectName);
+		query.setParameter("projectRevision", projectRevision );
+		return query.list();
+		
 	}
 	
 	public List<Member> selectMembers() {
@@ -66,13 +73,12 @@ public class Database {
 		return query.list();
 	}
 	
-	public List<Member> selectMembers(String projectName) {
-		Query query = session.createQuery("from "+MemberContract.TABLE_NAME+" where "+MemberContract.PROJECT+" = :name");
-		query.setParameter("name", projectName);
+	public List<Member> selectMembers(Project project) {
+		Query query = session.createQuery("from "+MemberContract.TABLE_NAME+" where "+MemberContract.PROJECT+" = :project");
+		query.setParameter("project", project);
+		
 		return query.list();
 	}
-	
-	
 	
 	public void close(){
 		session.getTransaction().commit();

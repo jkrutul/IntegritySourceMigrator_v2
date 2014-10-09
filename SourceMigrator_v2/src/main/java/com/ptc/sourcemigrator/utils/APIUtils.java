@@ -1,7 +1,6 @@
 package com.ptc.sourcemigrator.utils;
 
 
-import java.awt.image.SampleModel;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -16,12 +15,9 @@ import org.apache.log4j.Logger;
 
 import com.mks.api.CmdRunner;
 import com.mks.api.Command;
-import com.mks.api.IntegrationPoint;
 import com.mks.api.IntegrationPointFactory;
 import com.mks.api.MultiValue;
 import com.mks.api.Option;
-import com.mks.api.SelectionList;
-import com.mks.api.Session;
 import com.mks.api.response.APIException;
 import com.mks.api.response.Field;
 import com.mks.api.response.Response;
@@ -43,10 +39,10 @@ public class APIUtils{
 	private String hostname, username, password;
 	private int port;
 	private List<Project> projects;
-	private static CmdRunner clientCr;
+	private CmdRunner clientCr;
 	private CmdRunner serverCr;
 	
-	public static Sandbox createSandbox(String projectName, String hostname, String projectRevision,String devPath, String location) {
+	public Sandbox createSandbox(String projectName, String hostname, String projectRevision,String devPath, String location) {
 		Command cmd = new Command();
 		cmd.setApp(Command.SI);
 		cmd.setCommandName("createsandbox");
@@ -94,7 +90,7 @@ public class APIUtils{
 		
 
 	}
-	public static void dropAllSandboxes(String deletionPolicy) {
+	public void dropAllSandboxes(String deletionPolicy) {
 		List<Sandbox> sandboxes = getSandboxes(null, null);
 		List<String> sandboxesNames = new LinkedList<String>();
 		
@@ -103,7 +99,7 @@ public class APIUtils{
 		}
 		dropSanboxes(sandboxesNames, deletionPolicy);
 	}
-	public static void dropSanboxes(List<String> sandboxes, String deletionPolicy){
+	public void dropSanboxes(List<String> sandboxes, String deletionPolicy){
     	
     	for (String sandbox : sandboxes) {
     		Command cmd = new Command();
@@ -133,12 +129,12 @@ public class APIUtils{
     	}
     }
 
-	public static void dropSandbox(String sandbox, String deletionPolicy) {
+	public void dropSandbox(String sandbox, String deletionPolicy) {
 		LinkedList<String> ll = new LinkedList<String>();
 		ll.add(sandbox);
 		dropSanboxes(ll, deletionPolicy);
 	}
-	public static void exitIntegrityClient() throws InterruptedException{
+	public void exitIntegrityClient() throws InterruptedException{
     	try {
 			Process p = Runtime.getRuntime().exec("cmd /c im exit --noshutdown");
     		//Process p = Runtime.getRuntime().exec("im exit --noshutdown");
@@ -148,11 +144,11 @@ public class APIUtils{
 		}
     }
 	
-	public static List<Sandbox> getAllSandboxes() {
+	public List<Sandbox> getAllSandboxes() {
 		return getSandboxes(null, null);
 	}
 	 
-	public static Sandbox getSandbox(String sandboxName) {
+	public Sandbox getSandbox(String sandboxName) {
 		List<Sandbox> all = getAllSandboxes();
 		
 		for (Sandbox sandbox : all) {
@@ -163,7 +159,7 @@ public class APIUtils{
 		return null;
 	}
 	
-	public static List<Sandbox> getSandboxes(String project, String hostname) {
+	public List<Sandbox> getSandboxes(String project, String hostname) {
 		List<Sandbox> sandboxes = new LinkedList<Sandbox>();
 		Command cmd = new Command(Command.SI , "sandboxes");
 		String[] command = cmd.toStringArray();
@@ -234,13 +230,11 @@ public class APIUtils{
 		return sandboxes;
 	}
 
-	
-    
 	public APIUtils() {
 	
 	}
     
-	public static void addLabel(String label, List<Member> members, String sandbox, String project, String hostname, String projectRev) {
+	public void addLabel(String label, List<Member> members, String sandbox, String project, String hostname, String projectRev) {
 		Command cmd = new Command();
 		cmd.setApp(Command.SI);
 		cmd.setCommandName("addlabel");
@@ -384,7 +378,7 @@ public class APIUtils{
 		runCommand(cmd, true);
 	}
 	
-	public static void addSandboxAttr(String sandbox, String attrKey, String attrVal) {
+	public void addSandboxAttr(String sandbox, String attrKey, String attrVal) {
 		Command cmd = new Command();
 		cmd.setApp(Command.SI);
 		cmd.setCommandName("addsandboxattr");
@@ -418,7 +412,7 @@ public class APIUtils{
 		runCommand(cmd, true);		
 	}
 	
-	public static void  deleteLabel(String label, String member, String project, String sandbox, String projectRevision) {
+	public void  deleteLabel(String label, String member, String project, String sandbox, String projectRevision) {
 		Command cmd = new Command();
 		cmd.setApp(Command.SI);
 		cmd.setCommandName("deletelabel");
@@ -499,7 +493,7 @@ public class APIUtils{
 		
 	}
 	
-	public void connectToIntegrity(String userName, String password, String hostname, String port){
+	public void connectToIntegrity(String userName, String password, String hostname, String port) throws APIException{
 		this.username = userName;
 		this.password = password;
 		this.hostname = hostname;
@@ -526,7 +520,28 @@ public class APIUtils{
 			serverCr.setDefaultPort(Integer.parseInt(port));
 			
 		} catch (APIException e) {
-			e.printStackTrace();
+			log.error(e);
+		}
+		
+		Command cmd = new Command();
+		cmd.setApp(Command.SI);
+		cmd.setCommandName("projects");
+		Response response = clientCr.execute(cmd);
+
+		if (response != null) {
+			WorkItemIterator wii = response.getWorkItems();
+			while (wii.hasNext()) { 
+				Map<String, String> item = new HashMap<String, String>();
+				WorkItem wi = wii.next();
+				Iterator<Field> iterator = wi.getFields();
+				while (iterator.hasNext()) {
+					Field field = iterator.next();
+					if (field.getName().equals("projectName")) {
+						log.debug(field.getValueAsString());						
+					}
+	
+				}
+			}
 		}
 		
 
@@ -615,8 +630,16 @@ public class APIUtils{
 			runCommand(cmd, true);
 
 	}
-	
-	public void viewhistory(String member, String sandbox, String devPath, String projectRev) {
+	/**
+	 * Returns member revisions
+	 * @param member
+	 * @param sandbox
+	 * @param devPath
+	 * @param projectRev
+	 * @param project
+	 */
+	public List<String> viewhistory(String member, String sandbox, String devPath, String projectRev, String project) {
+		List<String> revisions = new LinkedList<>();
 		Map<String, String> options = new HashMap<String, String>();
 		if (sandbox != null) {
 			options.put("sandbox", sandbox);			
@@ -627,36 +650,32 @@ public class APIUtils{
 		if (projectRev != null) {
 			options.put("projectRevision", projectRev);
 		}		
-		List<Map<String, String>> siElements = getSIItems("viewhistory", options, null, member, false);
+		if (project != null) {
+			options.put("project", project);
+		}
+		List<Map<String, String>> siElements = getSIItems("viewhistory", options, null, member, false); // {revisions=1.1.1.1.1.1,1.1.1.1,1.1}
 		
 		for (Map<String, String> siElement : siElements) {
 			for (String key : siElement.keySet()) {
 				log.info("key= "+key+" value= " +siElement.get(key));
+				if(key.equals("revisions")) {
+					return Arrays.asList(siElement.get(key).split(","));
+				}
 			}
 		}
-		
+		return revisions;
 	}
 	
-	public void viewRevision(String member, String revision, String sandbox, String project) {
-		Map<String, String> options = new HashMap<String, String>();
-		if (sandbox != null)
-			options.put("sandbox", sandbox);
-		if (revision != null)
-			options.put("revision", revision);
-		if (project != null)
-			options.put("project", project);
-		if (hostname != null) {
-			options.put("hostname", hostname);
-		} else {
-			options.put("hostname", getHostname());
-		}
-		
-		List<Map<String, String>> contents = getSIItems("viewrevision", options, null, member, false);
-		for( Map<String, String> content : contents) {
-			for (String key : content.keySet()) {
-				log.info("key: " + key + " val: "+ content.get(key));
-			}
-		}
+	public void projectCo(String member, String project, String projectRevision, String memberRevison, String targetFile ) {
+		Command cmd = new Command(Command.SI);
+		cmd.setCommandName("projectco");
+		cmd.addOption(new Option("project", project));
+		cmd.addOption(new Option("projectRevision", projectRevision));
+		cmd.addOption(new Option("revision", memberRevison));
+		cmd.addOption(new Option("targetFile", targetFile));
+		cmd.addSelection(member);
+		runCommand(cmd,true);
+
 	}
 	
 	public void deleteProject(String projectName) {
@@ -826,6 +845,15 @@ public class APIUtils{
 		return hostname;
 	}
 	
+	public Member getMember(String project, String projectRevision, String memberName, String memberRevision) {
+		Member member = new Member();
+		Map<String, String> options = new HashMap<String, String>();
+		options.put("project", project);
+		
+		
+		return member;		
+	}
+	
 	/***
 	 * 
 	 * @param sandboxName - name of sandbox on client
@@ -855,6 +883,43 @@ public class APIUtils{
 			opts.put("project", sandbox.getProject());
 			opts.put("hostname", hostname);
 			Map<String,String> item = getSIItem("memberinfo", opts, null, new File(member.getName()).getName(), false);
+			if (item != null) {
+				member.addMemberProps(item);
+			}
+		}
+		
+		return listOfMembers;
+	}
+	
+	
+	public List<Member> getMembers(String projectName, String projectRevision, String hostname) {
+		
+		List<Member> listOfMembers = new LinkedList<Member>();
+		Map<String, String> options = new HashMap<String, String>();
+		options.put("project", projectName);
+		
+		if (projectRevision != null) {
+			options.put("projectRevision", projectRevision);
+		}
+
+		if (hostname != null) {
+			options.put("hostname", hostname);
+		} else {
+			options.put("hostname", getHostname());
+		}
+		List<Map<String, String>> membersPrefs  = getSIItems("viewproject", options,null,null, false);
+		for (Map<String,String> memberPrefs : membersPrefs) {
+			listOfMembers.add(new Member(memberPrefs));
+		}
+		
+		for (Member member : listOfMembers) { //get details
+			Map<String, String> opts = new HashMap<>();
+			opts.put("project", projectName);
+			opts.put("hostname", getHostname());
+			if(projectRevision != null) {
+				opts.put("projectRevision", projectRevision);
+			}
+			Map<String,String> item = getSIItem("memberinfo", opts, null, member.getName(), true);
 			if (item != null) {
 				member.addMemberProps(item);
 			}
@@ -929,28 +994,28 @@ public class APIUtils{
 				projects.add(new Project(item));
 			}			
 		}
-		
+
 		for (Project project : projects) { //get details 
 			Map<String, String> opts = new HashMap<>();
+			List<String> opts3 = new LinkedList<>();
+			opts3.add("devpaths");
 			opts.put("project", project.getName());
 			if(projectRevision != null && !projectRevision.isEmpty()) {
 				opts.put("projectRevision", projectRevision);
 			}
-			Map<String,String> item = getSIItem("projectinfo", opts, null, null, false);
+			Map<String,String> item = getSIItem("projectinfo", opts, opts3, null, false);
 			if (item != null) {
 				project.addProjectProps(item);
-			}
-			
+			}	
 		}
-		
-		return projects;
+		return projects ;
 	}
 
 	public List<String> getProjectRevisions(String projectName) {
 		Project project = getProject(projectName, null);
 		Map<String, String> options = new HashMap<>();
 		options.put("project", projectName);
-		
+
 		Map<String, String> items = getSIItem("viewprojecthistory", options, null, null, false);
 		if (!items.isEmpty()) {
 			return Arrays.asList(items.get("revisions").split(","));
@@ -1111,6 +1176,13 @@ public class APIUtils{
 	
 	public void setUsername(String username) {
 		this.username = username;
+	}
+	
+	@Override
+	public String toString() {
+		return "APIUtils [hostname=" + hostname + ", username=" + username
+				+ ", password=" + password + ", port=" + port + ", clientCr="
+				+ clientCr + ", serverCr=" + serverCr + "]";
 	}
 	
 }

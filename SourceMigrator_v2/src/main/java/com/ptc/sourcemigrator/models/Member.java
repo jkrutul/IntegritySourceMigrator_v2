@@ -5,13 +5,96 @@ import java.util.Map;
 public class Member {
 	private Long memberId;
 	
-	private String  name, memberName, parent, type, memberRev,
+	private String  name, memberName, parent, type,
 					memberRevLocedByMe, workingRevLockedByMe,
 					lockrecord, wfdelta, revsyncDelta,
 					newRevDelta, merge, canonicalSandbox,
 					canonicalMember,projectDevpath, date,
-					frozen, author, projectName;
+					frozen, author, projectName, developmentBranch,
+					state, description, memberRevision, cpsummary,
+					labels, locksandbox, symboliclink, revisionrule, attributes,
+					lastMigrated;
 	
+	public String getDevelopmentBranch() {
+		return developmentBranch;
+	}
+
+	public void setDevelopmentBranch(String developmentBranch) {
+		this.developmentBranch = developmentBranch;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getMemberRevision() {
+		return memberRevision;
+	}
+
+	public void setMemberRevision(String memberRevision) {
+		this.memberRevision = memberRevision;
+	}
+
+	public String getCpsummary() {
+		return cpsummary;
+	}
+
+	public void setCpsummary(String cpsummary) {
+		this.cpsummary = cpsummary;
+	}
+
+	public String getLabels() {
+		return labels;
+	}
+
+	public void setLabels(String labels) {
+		this.labels = labels;
+	}
+
+	public String getLocksandbox() {
+		return locksandbox;
+	}
+
+	public void setLocksandbox(String locksandbox) {
+		this.locksandbox = locksandbox;
+	}
+
+	public String getSymboliclink() {
+		return symboliclink;
+	}
+
+	public void setSymboliclink(String symboliclink) {
+		this.symboliclink = symboliclink;
+	}
+
+	public String getRevisionrule() {
+		return revisionrule;
+	}
+
+	public void setRevisionrule(String revisionrule) {
+		this.revisionrule = revisionrule;
+	}
+
+	public String getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(String attributes) {
+		this.attributes = attributes;
+	}
+
 	private Project project;
 	
 	public Member() {
@@ -30,7 +113,7 @@ public class Member {
 			} else if (field.equals("type")) {
 				setType(value);
 			} else if (field.equals("memberrev") || field.equals("memberrevision")) {
-				setMemberRev(value);
+				setMemberRevision(value);
 			} else if (field.equals("memberrevlockedbyme")) {
 				setMemberRevLocedByMe(value);
 			} else if (field.equals("workingrevlockedbyme")) {
@@ -59,8 +142,27 @@ public class Member {
 				setAuthor(value);
 			}else if (field.equals("projectname")) {
 				setProjectName(value);
-			}
-			
+			}else if (field.equals("developmentbranch")) {
+				setDevelopmentBranch(value);
+			}else if (field.equals("state")) {
+				setState(value);
+			}else if (field.equals("description")) {
+				setDescription(value);
+			}else if (field.equals("memberrevision")) {
+				setMemberRevision(value);
+			}else if (field.equals("cpsummary")) {
+				setCpsummary(value);
+			}else if (field.equals("labels")) {
+				setLabels(value);
+			}else if (field.equals("locksandbox")) {
+				setLocksandbox(value);
+			}else if (field.equals("symboliclink")) {
+				setSymboliclink(value);
+			}else if (field.equals("revisionrule")) {
+				setRevisionrule(value);
+			}else if (field.equals("attributes")) {
+				setAttributes(value);
+			}	
 		}
 	}
 
@@ -78,7 +180,7 @@ public class Member {
 			} else if (field.equals("type")) {
 				setType(value);
 			} else if (field.equals("memberrev") || field.equals("memberrevision")) {
-				setMemberRev(value);
+				setMemberRevision(value);
 			} else if (field.equals("memberrevlockedbyme")) {
 				setMemberRevLocedByMe(value);
 			} else if (field.equals("workingrevlockedbyme")) {
@@ -107,7 +209,27 @@ public class Member {
 				setAuthor(value);
 			}else if (field.equals("projectname")) {
 				setProjectName(value);
-			}
+			}else if (field.equals("developmentbranch")) {
+				setDevelopmentBranch(value);
+			}else if (field.equals("state")) {
+				setState(value);
+			}else if (field.equals("description")) {
+				setDescription(value);
+			}else if (field.equals("memberrevision")) {
+				setMemberRevision(value);
+			}else if (field.equals("cpsummary")) {
+				setCpsummary(value);
+			}else if (field.equals("labels")) {
+				setLabels(value);
+			}else if (field.equals("locksandbox")) {
+				setLocksandbox(value);
+			}else if (field.equals("symboliclink")) {
+				setSymboliclink(value);
+			}else if (field.equals("revisionrule")) {
+				setRevisionrule(value);
+			}else if (field.equals("attributes")) {
+				setAttributes(value);
+			}	
 		}
 	}
 
@@ -137,10 +259,6 @@ public class Member {
 
 	public String getMemberName() {
 		return memberName;
-	}
-
-	public String getMemberRev() {
-		return memberRev;
 	}
 
 	public String getMemberRevLocedByMe() {
@@ -215,10 +333,6 @@ public class Member {
 		this.memberName = memberName;
 	}
 
-	public void setMemberRev(String memberRev) {
-		this.memberRev = memberRev;
-	}
-
 	public void setMemberRevLocedByMe(String memberRevLocedByMe) {
 		this.memberRevLocedByMe = memberRevLocedByMe;
 	}
@@ -263,23 +377,25 @@ public class Member {
 		this.workingRevLockedByMe = workingRevLockedByMe;
 	}
 
-
-
-
 	@Override
 	public String toString() {
 		return "Member [memberId=" + memberId + ", name=" + name
 				+ ", memberName=" + memberName + ", parent=" + parent
-				+ ", type=" + type + ", memberRev=" + memberRev
-				+ ", memberRevLocedByMe=" + memberRevLocedByMe
-				+ ", workingRevLockedByMe=" + workingRevLockedByMe
-				+ ", lockrecord=" + lockrecord + ", wfdelta=" + wfdelta
-				+ ", revsyncDelta=" + revsyncDelta + ", newRevDelta="
-				+ newRevDelta + ", merge=" + merge + ", canonicalSandbox="
-				+ canonicalSandbox + ", canonicalMember=" + canonicalMember
-				+ ", projectDevpath=" + projectDevpath + ", date=" + date
-				+ ", frozen=" + frozen + ", author=" + author
-				+ ", projectName=" + projectName + ", project=" + project + "]";
+				+ ", type=" + type + ", memberRevLocedByMe="
+				+ memberRevLocedByMe + ", workingRevLockedByMe="
+				+ workingRevLockedByMe + ", lockrecord=" + lockrecord
+				+ ", wfdelta=" + wfdelta + ", revsyncDelta=" + revsyncDelta
+				+ ", newRevDelta=" + newRevDelta + ", merge=" + merge
+				+ ", canonicalSandbox=" + canonicalSandbox
+				+ ", canonicalMember=" + canonicalMember + ", projectDevpath="
+				+ projectDevpath + ", date=" + date + ", frozen=" + frozen
+				+ ", author=" + author + ", projectName=" + projectName
+				+ ", developmentBranch=" + developmentBranch + ", state="
+				+ state + ", description=" + description + ", memberRevision="
+				+ memberRevision + ", cpsummary=" + cpsummary + ", labels="
+				+ labels + ", locksandbox=" + locksandbox + ", symboliclink="
+				+ symboliclink + ", revisionrule=" + revisionrule
+				+ ", attributes=" + attributes + ", project=" + project + "]";
 	}
 
 	public Project getProject() {
@@ -296,6 +412,14 @@ public class Member {
 
 	public void setMemberId(Long memberId) {
 		this.memberId = memberId;
+	}
+
+	public String getLastMigrated() {
+		return lastMigrated;
+	}
+
+	public void setLastMigrated(String lastMigrated) {
+		this.lastMigrated = lastMigrated;
 	}
 
 }

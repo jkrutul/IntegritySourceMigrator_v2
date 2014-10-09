@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Oct 3, 2014 5:01:26 PM by Hibernate Tools 3.4.0.CR1 -->
+<!-- Generated Oct 9, 2014 3:31:37 PM by Hibernate Tools 3.4.0.CR1 -->
 <hibernate-mapping>
     <class name="com.ptc.sourcemigrator.models.Member" table="MEMBER">
         <id name="memberId" type="java.lang.Long">
@@ -19,9 +19,6 @@
         </property>
         <property name="type" type="java.lang.String">
             <column name="TYPE" />
-        </property>
-        <property name="memberRev" type="java.lang.String">
-            <column name="MEMBERREV" />
         </property>
         <property name="memberRevLocedByMe" type="java.lang.String">
             <column name="MEMBERREVLOCEDBYME" />
@@ -64,6 +61,39 @@
         </property>
         <property name="projectName" type="java.lang.String">
             <column name="PROJECTNAME" />
+        </property>
+        <property name="developmentBranch" type="java.lang.String">
+            <column name="DEVELOPMENTBRANCH" />
+        </property>
+        <property name="state" type="java.lang.String">
+            <column name="STATE" />
+        </property>
+        <property name="description" type="java.lang.String">
+            <column name="DESCRIPTION" />
+        </property>
+        <property name="memberRevision" type="java.lang.String">
+            <column name="MEMBERREVISION" />
+        </property>
+        <property name="cpsummary" type="java.lang.String">
+            <column name="CPSUMMARY" />
+        </property>
+        <property name="labels" type="java.lang.String">
+            <column name="LABELS" />
+        </property>
+        <property name="locksandbox" type="java.lang.String">
+            <column name="LOCKSANDBOX" />
+        </property>
+        <property name="symboliclink" type="java.lang.String">
+            <column name="SYMBOLICLINK" />
+        </property>
+        <property name="revisionrule" type="java.lang.String">
+            <column name="REVISIONRULE" />
+        </property>
+        <property name="attributes" type="java.lang.String">
+            <column name="ATTRIBUTES" />
+        </property>
+        <property name="lastMigrated" type="java.lang.String">
+            <column name="LASTMIGRATED" />
         </property>
         <many-to-one name="project" class="com.ptc.sourcemigrator.models.Project" fetch="join">
             <column name="PROJECT" />

@@ -6,13 +6,20 @@ import java.util.Map;
 
 public class Project {
 	private Long projectId;
-	private String name, path, isSubproject, isShared, parent, isVariant, isBuild, buildRevision, server; //TODO support lastCheckpoint
-	//private List<String> developmentPaths = new LinkedList<>();
+	private String  name,
+			path, isSubproject, isShared, parent,
+			isVariant, isBuild, buildRevision, revision, server,
+			fullConfigSyntax, projectType, numSubprojects,
+			sharedFrom, serverPort, lastCheckpoint, projectAnnotation,
+			lastMigrated;
+
 	private String developmentPaths;
+
+
 	public Project() {
 		
 	}
-	
+
 
 	public Project(Map<String,String> projectProps) {
 		for (String field : projectProps.keySet()) {
@@ -33,8 +40,24 @@ public class Project {
 				setDevelopmentPath(value);
 			}else if (field.equals("isBuild")) {
 				setIsBuild(value);
-			}else if (field.equals("buildRevision") || field.equals("revision") ) {
+			}else if (field.equals("buildRevision")) { 
 				setBuildRevision(value);
+			} else if (field.equals("lastCheckpoint")) {
+				setLastCheckpoint(value);
+			}else if (field.equals("projectAnnotation")) {
+				setProjectAnnotation(value);
+			}else if (field.equals("sharedFrom")) {
+				setSharedFrom(value);
+			}else if (field.equals("fullConfigSyntax")) {
+				setFullConfigSyntax(value);
+			}else if (field.equals("projectType")) {
+				setProjectType(value);
+			}else if (field.equals("numSubprojects")) {
+				setNumSubprojects(value);
+			}else if (field.equals("serverPort")) {
+				setServerPort(value);
+			} else if (field.equals("revision") ) {
+				setRevision(value);
 			}
 		}
 	}
@@ -60,7 +83,8 @@ public class Project {
 		this.isBuild = isBuild;
 		this.buildRevision = buildRevision;
 	}
-	
+
+
 	public void addProjectProps(Map<String,String> projectProps) {
 		for (String field : projectProps.keySet()) {
 			String value = projectProps.get(field);
@@ -77,17 +101,34 @@ public class Project {
 				setParent(value);
 			} else if (field.equals("isVariant")) {
 				setIsVariant(value);
-			} else if (field.equals("developmentPath") || field.equals("developmentPaths")) {
+			} else if (field.equals("developmentPaths")) {
 				setDevelopmentPath(value);
 			}else if (field.equals("isBuild")) {
 				setIsBuild(value);
-			}else if (field.equals("buildRevision") || field.equals("revision") ) {
+			}else if (field.equals("buildRevision")) {
 				setBuildRevision(value);
 			}else if (field.equals("server")) {
 				setServer(value);
+			} else if (field.equals("lastCheckpoint")) {
+				setLastCheckpoint(value);
+			}else if (field.equals("projectAnnotation")) {
+				setProjectAnnotation(value);
+			}else if (field.equals("sharedFrom")) {
+				setSharedFrom(value);
+			}else if (field.equals("fullConfigSyntax")) {
+				setFullConfigSyntax(value);
+			}else if (field.equals("projectType")) {
+				setProjectType(value);
+			}else if (field.equals("numSubprojects")) {
+				setNumSubprojects(value);
+			}else if (field.equals("serverPort")) {
+				setServerPort(value);
+			} else if (field.equals("revision") ) {
+				setRevision(value);
 			}
 		}
 	}
+
 
 	public String getBuildRevision() {
 		return buildRevision;
@@ -97,32 +138,78 @@ public class Project {
 		return developmentPaths;
 	}
 
+
+	public String getFullConfigSyntax() {
+		return fullConfigSyntax;
+	}
+
+
 	public String getIsBuild() {
 		return isBuild;
 	}
+
 
 	public String getIsShared() {
 		return isShared;
 	}
 
+
 	public String getIsSubproject() {
 		return isSubproject;
 	}
+
 
 	public String getIsVariant() {
 		return isVariant;
 	}
 
+
+	public String getLastCheckpoint() {
+		return lastCheckpoint;
+	}
+
+
 	public String getName() {
 		return name;
 	}
 
+
+	public String getNumSubprojects() {
+		return numSubprojects;
+	}
+
+
 	public String getParent() {
 		return parent;
 	}
-
 	public String getPath() {
 		return path;
+	}
+	
+
+	public String getProjectAnnotation() {
+		return projectAnnotation;
+	}
+
+
+	public Long getProjectId() {
+		return projectId;
+	}
+	
+	public String getProjectType() {
+		return projectType;
+	}
+
+	public String getServer() {
+		return server;
+	}
+
+	public String getServerPort() {
+		return serverPort;
+	}
+
+	public String getSharedFrom() {
+		return sharedFrom;
 	}
 
 	public void setBuildRevision(String buildRevision) {
@@ -135,6 +222,14 @@ public class Project {
 		if (developmentPath != null)
 		this.developmentPaths.add(developmentPath);
 		*/
+	}
+
+	public void setDevelopmentPaths(String developmentPaths) {
+		this.developmentPaths = developmentPaths;
+	}
+
+	public void setFullConfigSyntax(String fullConfigSyntax) {
+		this.fullConfigSyntax = fullConfigSyntax;
 	}
 
 	public void setIsBuild(String isBuild) {
@@ -153,8 +248,16 @@ public class Project {
 		this.isVariant = isVariant;
 	}
 
+	public void setLastCheckpoint(String lastCheckpoint) {
+		this.lastCheckpoint = lastCheckpoint;
+	}
+
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setNumSubprojects(String numSubprojects) {
+		this.numSubprojects = numSubprojects;
 	}
 
 	public void setParent(String parent) {
@@ -163,6 +266,37 @@ public class Project {
 
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	public void setProjectAnnotation(String projectAnnotation) {
+		this.projectAnnotation = projectAnnotation;
+	}
+
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
+	}
+
+
+
+
+
+	public void setProjectType(String projectType) {
+		this.projectType = projectType;
+	}
+
+
+	public void setServer(String server) {
+		this.server = server;
+	}
+
+
+	public void setServerPort(String serverPort) {
+		this.serverPort = serverPort;
+	}
+
+
+	public void setSharedFrom(String sharedFrom) {
+		this.sharedFrom = sharedFrom;
 	}
 
 
@@ -175,27 +309,32 @@ public class Project {
 				+ path + ", isSubproject=" + isSubproject + ", isShared="
 				+ isShared + ", parent=" + parent + ", isVariant=" + isVariant
 				+ ", isBuild=" + isBuild + ", buildRevision=" + buildRevision
-				+ ", server=" + server + ", developmentPaths="
-				+ developmentPaths + "]";
+				+ ", revision=" + revision + ", server=" + server
+				+ ", fullConfigSyntax=" + fullConfigSyntax + ", projectType="
+				+ projectType + ", numSubprojects=" + numSubprojects
+				+ ", sharedFrom=" + sharedFrom + ", serverPort=" + serverPort
+				+ ", lastCheckpoint=" + lastCheckpoint + ", projectAnnotation="
+				+ projectAnnotation + ", developmentPaths=" + developmentPaths
+				+ "]";
 	}
 
 
-	public Long getProjectId() {
-		return projectId;
+	public String getRevision() {
+		return revision;
 	}
 
 
-	public void setProjectId(Long projectId) {
-		this.projectId = projectId;
+	public void setRevision(String revision) {
+		this.revision = revision;
 	}
 
 
-	public String getServer() {
-		return server;
+	public String getLastMigrated() {
+		return lastMigrated;
 	}
 
 
-	public void setServer(String server) {
-		this.server = server;
+	public void setLastMigrated(String lastMigrated) {
+		this.lastMigrated = lastMigrated;
 	}
 }

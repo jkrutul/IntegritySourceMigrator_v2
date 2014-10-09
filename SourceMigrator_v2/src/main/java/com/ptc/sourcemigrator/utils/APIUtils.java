@@ -1,7 +1,6 @@
 package com.ptc.sourcemigrator.utils;
 
 
-import java.awt.image.SampleModel;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -16,12 +15,9 @@ import org.apache.log4j.Logger;
 
 import com.mks.api.CmdRunner;
 import com.mks.api.Command;
-import com.mks.api.IntegrationPoint;
 import com.mks.api.IntegrationPointFactory;
 import com.mks.api.MultiValue;
 import com.mks.api.Option;
-import com.mks.api.SelectionList;
-import com.mks.api.Session;
 import com.mks.api.response.APIException;
 import com.mks.api.response.Field;
 import com.mks.api.response.Response;
@@ -234,8 +230,6 @@ public class APIUtils{
 		return sandboxes;
 	}
 
-	
-    
 	public APIUtils() {
 	
 	}
@@ -672,26 +666,16 @@ public class APIUtils{
 		return revisions;
 	}
 	
-	public void viewRevision(String member, String revision, String sandbox, String project) {
-		Map<String, String> options = new HashMap<String, String>();
-		if (sandbox != null)
-			options.put("sandbox", sandbox);
-		if (revision != null)
-			options.put("revision", revision);
-		if (project != null)
-			options.put("project", project);
-		if (hostname != null) {
-			options.put("hostname", hostname);
-		} else {
-			options.put("hostname", getHostname());
-		}
-		
-		List<Map<String, String>> contents = getSIItems("viewrevision", options, null, member, false);
-		for( Map<String, String> content : contents) {
-			for (String key : content.keySet()) {
-				log.info("key: " + key + " val: "+ content.get(key));
-			}
-		}
+	public void projectCo(String member, String project, String projectRevision, String memberRevison, String targetFile ) {
+		Command cmd = new Command(Command.SI);
+		cmd.setCommandName("projectco");
+		cmd.addOption(new Option("project", project));
+		cmd.addOption(new Option("projectRevision", projectRevision));
+		cmd.addOption(new Option("revision", memberRevison));
+		cmd.addOption(new Option("targetFile", targetFile));
+		cmd.addSelection(member);
+		runCommand(cmd,true);
+
 	}
 	
 	public void deleteProject(String projectName) {
@@ -931,8 +915,11 @@ public class APIUtils{
 		for (Member member : listOfMembers) { //get details
 			Map<String, String> opts = new HashMap<>();
 			opts.put("project", projectName);
-			opts.put("hostname", hostname);
-			Map<String,String> item = getSIItem("memberinfo", opts, null, new File(member.getName()).getName(), false);
+			opts.put("hostname", getHostname());
+			if(projectRevision != null) {
+				opts.put("projectRevision", projectRevision);
+			}
+			Map<String,String> item = getSIItem("memberinfo", opts, null, member.getName(), true);
 			if (item != null) {
 				member.addMemberProps(item);
 			}
@@ -1007,21 +994,21 @@ public class APIUtils{
 				projects.add(new Project(item));
 			}			
 		}
-		
+
 		for (Project project : projects) { //get details 
 			Map<String, String> opts = new HashMap<>();
+			List<String> opts3 = new LinkedList<>();
+			opts3.add("devpaths");
 			opts.put("project", project.getName());
 			if(projectRevision != null && !projectRevision.isEmpty()) {
 				opts.put("projectRevision", projectRevision);
 			}
-			Map<String,String> item = getSIItem("projectinfo", opts, null, null, false);
+			Map<String,String> item = getSIItem("projectinfo", opts, opts3, null, false);
 			if (item != null) {
 				project.addProjectProps(item);
-			}
-			
+			}	
 		}
-		
-		return projects;
+		return projects ;
 	}
 
 	public List<String> getProjectRevisions(String projectName) {
@@ -1189,6 +1176,13 @@ public class APIUtils{
 	
 	public void setUsername(String username) {
 		this.username = username;
+	}
+	
+	@Override
+	public String toString() {
+		return "APIUtils [hostname=" + hostname + ", username=" + username
+				+ ", password=" + password + ", port=" + port + ", clientCr="
+				+ clientCr + ", serverCr=" + serverCr + "]";
 	}
 	
 }

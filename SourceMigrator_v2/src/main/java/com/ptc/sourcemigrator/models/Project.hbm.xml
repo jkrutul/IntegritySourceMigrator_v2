@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated Oct 3, 2014 5:01:26 PM by Hibernate Tools 3.4.0.CR1 -->
+<!-- Generated Oct 9, 2014 3:31:37 PM by Hibernate Tools 3.4.0.CR1 -->
 <hibernate-mapping>
     <class name="com.ptc.sourcemigrator.models.Project" table="PROJECT">
         <id name="projectId" type="java.lang.Long">
@@ -32,10 +32,37 @@
         <property name="buildRevision" type="java.lang.String">
             <column name="BUILDREVISION" />
         </property>
+        <property name="revision" type="java.lang.String">
+            <column name="REVISION" />
+        </property>
         <property name="server" type="java.lang.String">
             <column name="SERVER" />
         </property>
-        <property name="developmentPaths" type="java.lang.String" access="field">
+        <property name="fullConfigSyntax" type="java.lang.String">
+            <column name="FULLCONFIGSYNTAX" />
+        </property>
+        <property name="projectType" type="java.lang.String">
+            <column name="PROJECTTYPE" />
+        </property>
+        <property name="numSubprojects" type="java.lang.String">
+            <column name="NUMSUBPROJECTS" />
+        </property>
+        <property name="sharedFrom" type="java.lang.String">
+            <column name="SHAREDFROM" />
+        </property>
+        <property name="serverPort" type="java.lang.String">
+            <column name="SERVERPORT" />
+        </property>
+        <property name="lastCheckpoint" type="java.lang.String">
+            <column name="LASTCHECKPOINT" />
+        </property>
+        <property name="projectAnnotation" type="java.lang.String">
+            <column name="PROJECTANNOTATION" />
+        </property>
+        <property name="lastMigrated" type="java.lang.String">
+            <column name="LASTMIGRATED" />
+        </property>
+        <property name="developmentPaths" type="java.lang.String">
             <column name="DEVELOPMENTPATHS" />
         </property>
     </class>

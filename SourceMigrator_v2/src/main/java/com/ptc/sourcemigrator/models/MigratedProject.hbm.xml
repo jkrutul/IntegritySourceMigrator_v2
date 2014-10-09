@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Oct 9, 2014 6:08:57 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.ptc.sourcemigrator.models.MigratedProject" table="MIGRATEDPROJECT">
+        <id name="project" type="com.ptc.sourcemigrator.models.Project">
+            <column name="PROJECT" />
+            <generator class="native" />
+        </id>
+        <property name="date" type="java.lang.String">
+            <column name="DATE" />
+        </property>
+        <property name="newProjectRevision" type="java.lang.String">
+            <column name="NEWPROJECTREVISION" />
+        </property>
+    </class>
+</hibernate-mapping>

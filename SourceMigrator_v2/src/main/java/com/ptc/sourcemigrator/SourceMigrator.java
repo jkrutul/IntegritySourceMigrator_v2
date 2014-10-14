@@ -5,10 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.configuration.CompositeConfiguration;
@@ -29,12 +29,13 @@ public class SourceMigrator {
 	public static final String PROPERTIES_FILE = "sm.properties";
 	public static String sourceServer, destinationServer, appDir, srcHostname, destHostname, srcPort, destPort, srcUser, destUser, srcPassword, destPassword, rootForMigratedProjects;
 	public static CompositeConfiguration config;
-	private static final Logger log = LogManager.getLogger(App.class.getName());
+	private Logger log = LogManager.getLogger(App.class.getName());
 
 	public static APIUtils src, dest;
 	public static  Database db;
 	
-	static {
+	
+	public SourceMigrator() {
 		System.out.println("********** Integrity Source Migratoin Tool **********");
 		config = new CompositeConfiguration();
 		config.addConfiguration(new SystemConfiguration());
@@ -78,8 +79,9 @@ public class SourceMigrator {
 			log.error(e);
 		}
 	   db = new Database();
-	        
 	}
+	
+
 	
 	/***
 	 * Export project from src server to database
@@ -161,66 +163,76 @@ public class SourceMigrator {
      * @param migratedProjectLocation -- location on destination server, where project will be save, by default is read from config file
      */
     public void migrateProject(String projectName, String projectRevision,String migratedProjectLocation) {
-    	
+ 
+   
     	if (migratedProjectLocation == null) {
     		migratedProjectLocation = rootForMigratedProjects;
     	}
-    	Project projectImported, projectMigrated;
+    	Project projectFromSource, projectMigrated;
     	Sandbox sandboxImported, sandboxMigrated;
-
-    	projectImported= src.getProject(projectName, null);
     	
-    	if ( projectImported != null ) {
+    	// find project on source server, if not exist return
+    	projectFromSource= src.getProject(projectName, null);
+    	
+    	if ( projectFromSource != null ) {
     		log.info("Found "+projectName+" on " + src.getHostname());
-    		log.info(projectImported);
+    		log.info(projectFromSource);
     		
     	} else {
     		log.error("Project "+ projectName+ " not exists on " +src.getHostname());
     		return;
     	}
     	
-    	// Create sandbox (if not exist) -> imported project
-    	List<Sandbox> sandboxesToSrc = src.getSandboxes(projectImported.getName(), src.getHostname());
+    	// create sandbox to project on source server
+    	String tmpSandboxPath = "c:\\sandboxes\\TMP\\imported\\"+new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date()); 	 //unique temp dir for migrated project
+    	String sandboxname = new File(projectName).getParent();
+    	sandboxImported = src.createSandbox(projectName, src.getHostname(), projectRevision, null, tmpSandboxPath+sandboxname );
+    	log.info(sandboxImported);
 
-    	if (sandboxesToSrc.size()>0) {
-        	log.info("Found " +sandboxesToSrc.size()+ " sandboxes point to " + projectName);
-    		for (Sandbox s : sandboxesToSrc) {
-    			log.info(s);
+    	// Create project on destination server witch name of migrated project
+    	String migratedProjectName = projectName;
+    	String prParentDir = "/";
+    	
+    	String tmpS[] = projectName.split("/");
+    	for(int i = 0 ; i<(tmpS.length -1) ; i++) {
+    		if(!tmpS[i].isEmpty()) {
+    			prParentDir+=tmpS[i]+"/";
     		}
-    		sandboxImported = sandboxesToSrc.get(0);
-    		
-    	} else {
-    		log.info("Not found any sanboxes pointing to " + projectName+ ". Creating new one");
-    		String sandboxname = new File(projectName).getParent();
-    		sandboxImported = src.createSandbox(projectName, src.getHostname(), projectRevision, null, "c:\\sandboxes\\"+sandboxname);
-    		log.info(sandboxImported);
     	}
-
-    	// Create project on destination server
-    	String appendix =  "/TEMP/Migrated";
-    	String migratedProjectName = appendix +"/project.pj";
+    	
 
     	int i= 0;
     	if (dest.getProject(migratedProjectName, null) != null){ // Check whether the project of the same name already exists
 	    	for ( ; true; i++) {
-	    		log.info("Already found project named "+migratedProjectName +" on "+src.getHostname()+" server");
-	    		if (dest.getProject(appendix+"_"+Integer.toString(i)+"/project.pj",null) == null) {
+	    		log.info("Already found project named "+migratedProjectName+" on "+dest.getHostname()+" server");
+	    		if (dest.getProject(prParentDir+"_"+Integer.toString(i)+"/project.pj",null) == null) {
 	    			break;
 	    		}
 	    	}
-	    	migratedProjectName = appendix+"_"+Integer.toString(i)+"/project.pj";
-    		log.info("Creating new " + migratedProjectName);
-    		projectMigrated = dest.createProject(migratedProjectName);
+	    	migratedProjectName = prParentDir+"_"+Integer.toString(i)+"/project.pj";
+    	
+    	} 
+    	projectMigrated = dest.createProject(migratedProjectName);
+    	
+    	if (projectMigrated != null) {
+    		log.info("Created project" + projectMigrated);
     	} else {
-    		log.info("Creating new " + migratedProjectName);
-    		projectMigrated = dest.createProject(migratedProjectName);
+    		log.error("Can't create project "+migratedProjectName + " on destination server");
+    		return;
     	}
 
-    	// Create sandbox -> migrated project
-    	sandboxMigrated = src.createSandbox(migratedProjectName, dest.getHostname(), null, null, migratedProjectLocation);
-    	log.info("Sandbox to " +migratedProjectName + " has been created");
-    	log.info(sandboxMigrated);    	
+    	// Create sandbox to migrated project on destination server
+    	migratedProjectLocation += new File(migratedProjectName).getParent();
+    	sandboxMigrated = dest.createSandbox(migratedProjectName, dest.getHostname(), null, null, migratedProjectLocation);
     	
+    	if (sandboxMigrated != null ) {
+	    	log.info("Sandbox to " +migratedProjectName + " has been created");
+	    	log.info(sandboxMigrated);     		
+    	} else {
+    		log.error("falied to create sandbox");
+    		return;
+    	}
+   	
     	// Copy members to new project dir    	
         String importedDir = new File(sandboxImported.getName()).getParent();
         String migratedDir = new File(sandboxMigrated.getName()).getParent();
@@ -247,9 +259,9 @@ public class SourceMigrator {
 
         // Drop importedSandbox, delete importedProject
         log.info("Droping/removing sandbox and project");
-    	src.dropSandbox(sandboxImported.getName(), APIUtils.DELETION_POLICY_NONE);
-    	dest.dropProject(projectImported.getName());
-    	dest.deleteProject(projectImported.getName());
+    	src.dropSandbox(sandboxImported.getName(), APIUtils.DELETION_POLICY_ALL);
+    	//dest.dropProject(projectMigrated.getName());
+    	//dest.deleteProject(projectMigrated.getName());
 
     }
 
